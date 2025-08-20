@@ -1,211 +1,30 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Gestión de Categorías - Sistema de Inventario{% endblock %}
+{% block title %}Categorias - Sistema de Inventario{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
+    <h1>Gestion de Categorias</h1>
     
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1>📁 Gestión de Categorías</h1>
-            
-            {% if usando_bd %}
-                <div class="alert alert-success">
-                    <strong>✅ {{ mensaje_conexion }}</strong>
-                </div>
-            {% elseif error_bd %}
-                <div class="alert alert-danger">
-                    <strong>❌ Error de Base de Datos</strong><br>
-                    {{ mensaje_error }}
-                    <br><small>Contacte al administrador del sistema.</small>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    {% if not error_bd %}
-    <!-- Estadísticas -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-number text-success">{{ total_activas }}</div>
-            <div class="stat-label">Categorías Activas</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number text-warning">{{ total_inactivas }}</div>
-            <div class="stat-label">Categorías Inactivas</div>
-        </div>
-    </div>
-
-    <!-- Categorías Activas -->
-    <div class="card">
-        <div class="card-header">
-            <h5>📂 Categorías Activas</h5>
-            <button class="btn btn-success btn-sm" onclick="nuevaCategoria()">➕ Nueva Categoría</button>
-        </div>
-        <div class="card-body">
-            {% if categorias|length > 0 %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Fecha Creación</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for categoria in categorias %}
-                    <tr>
-                        <td>{{ categoria.id }}</td>
-                        <td><strong>{{ categoria.nombre }}</strong></td>
-                        <td>{{ categoria.descripcion|default('Sin descripción') }}</td>
-                        <td>{{ categoria.fecha_creacion|default('N/A') }}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="verCategoria({{ categoria.id }})">👁️ Ver</button>
-                            <button class="btn btn-warning btn-sm" onclick="editarCategoria({{ categoria.id }})">✏️ Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarCategoria({{ categoria.id }})">🗑️ Eliminar</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="alert alert-info text-center">
-                <h5>📭 No hay categorías activas</h5>
-                <p>Crea tu primera categoría usando el botón "Nueva Categoría"</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Categorías Inactivas (solo si hay) -->
-    {% if categorias_inactivas|length > 0 %}
-    <div class="card mt-4">
-        <div class="card-header">
-            <h5>🗃️ Categorías Inactivas</h5>
-        </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Fecha Creación</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for categoria in categorias_inactivas %}
-                    <tr class="text-muted">
-                        <td>{{ categoria.id }}</td>
-                        <td>{{ categoria.nombre }}</td>
-                        <td>{{ categoria.descripcion|default('Sin descripción') }}</td>
-                        <td>{{ categoria.fecha_creacion|default('N/A') }}</td>
-                        <td>
-                            <button class="btn btn-success btn-sm" onclick="reactivarCategoria({{ categoria.id }})">🔄 Reactivar</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-    {% endif %}
-
-</div>
-
-<script>
-function nuevaCategoria() {
-    const nombre = prompt('Nombre de la nueva categoría:');
-    if (nombre) {
-        const descripcion = prompt('Descripción (opcional):') || '';
-        
-        fetch('/api/categorias', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({nombre: nombre, descripcion: descripcion})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ Categoría creada exitosamente');
-                location.reload();
-            } else {
-                alert('❌ Error: ' + data.message);
-            }
-        })
-        .catch(error => alert('❌ Error de conexión: ' + error));
-    }
-}
-
-function editarCategoria(id) {
-    const nombre = prompt('Nuevo nombre:');
-    if (nombre) {
-        const descripcion = prompt('Nueva descripción (opcional):') || '';
-        
-        fetch(`/api/categorias/${id}`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({nombre: nombre, descripcion: descripcion})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ Categoría actualizada exitosamente');
-                location.reload();
-            } else {
-                alert('❌ Error: ' + data.message);
-            }
-        });
-    }
-}
-
-function eliminarCategoria(id) {
-    if (confirm('¿Estás seguro de que deseas desactivar esta categoría?')) {
-        fetch(`/api/categorias/${id}`, {method: 'DELETE'})
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ Categoría desactivada exitosamente');
-                location.reload();
-            } else {
-                alert('❌ Error: ' + data.message);
-            }
-        });
-    }
-}
-
-function reactivarCategoria(id) {
-    fetch(`/api/categorias/${id}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({activo: true})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ Categoría reactivada exitosamente');
-            location.reload();
-        } else {
-            alert('❌ Error: ' + data.message);
-        }
-    });
-}
-
-function verCategoria(id) {
-    fetch(`/api/categorias/${id}`)
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const cat = data.data;
-            alert(`📋 Información de Categoría\n\nID: ${cat.id}\nNombre: ${cat.nombre}\nDescripción: ${cat.descripcion}\nActivo: ${cat.activo ? 'Sí' : 'No'}\nCreado: ${cat.fecha_creacion}\nActualizado: ${cat.fecha_actualizacion}`);
-        } else {
-            alert('❌ Error: ' + data.message);
-        }
-    });
-}
-</script>
+    <p>Total de categorias: {{ total }}</p>
+    
+    <table style="width: 100%; border: 1px solid #ccc; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="background: #f5f5f5;">
+                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">ID</th>
+                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Nombre</th>
+                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Descripcion</th>
+                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for categoria in categorias %}
+            <tr>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.id }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.nombre }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.descripcion }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.fecha }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
