@@ -4,662 +4,208 @@
 
 {% block body %}
 <div class="container-fluid py-4">
+    
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="h3 mb-3">
-                <i class="fas fa-tags"></i> Gestión de Categorías
-            </h1>
+            <h1>📁 Gestión de Categorías</h1>
+            
+            {% if usando_bd %}
+                <div class="alert alert-success">
+                    <strong>✅ {{ mensaje_conexion }}</strong>
+                </div>
+            {% elseif error_bd %}
+                <div class="alert alert-danger">
+                    <strong>❌ Error de Base de Datos</strong><br>
+                    {{ mensaje_error }}
+                    <br><small>Contacte al administrador del sistema.</small>
+                </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Estadísticas rápidas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card stats-card success">
-                <div class="card-body text-center">
-                    <i class="fas fa-check-circle fa-2x mb-2"></i>
-                    <h4>{{ total_activas }}</h4>
-                    <p class="mb-0">Categorías Activas</p>
-                </div>
-            </div>
+    {% if not error_bd %}
+    <!-- Estadísticas -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number text-success">{{ total_activas }}</div>
+            <div class="stat-label">Categorías Activas</div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card warning">
-                <div class="card-body text-center">
-                    <i class="fas fa-pause-circle fa-2x mb-2"></i>
-                    <h4>{{ total_inactivas }}</h4>
-                    <p class="mb-0">Categorías Inactivas</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5><i class="fas fa-info-circle"></i> Gestión de Categorías</h5>
-                    <p class="mb-0">
-                        Aquí puedes crear, editar y eliminar categorías. 
-                        Las categorías eliminadas se marcan como inactivas para mantener la integridad de los datos.
-                    </p>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-number text-warning">{{ total_inactivas }}</div>
+            <div class="stat-label">Categorías Inactivas</div>
         </div>
     </div>
 
-    <!-- Botones de acción -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <button class="btn btn-success me-2" onclick="mostrarModalCrear()">
-                        <i class="fas fa-plus"></i> Nueva Categoría
-                    </button>
-                    <button class="btn btn-info me-2" onclick="cargarCategorias()">
-                        <i class="fas fa-sync"></i> Actualizar Lista
-                    </button>
-                    <button class="btn btn-warning me-2" onclick="toggleInactivas()">
-                        <i class="fas fa-eye"></i> <span id="toggle-text">Ver Inactivas</span>
-                    </button>
-                    <button class="btn btn-primary" onclick="probarAPI()">
-                        <i class="fas fa-code"></i> Probar API
-                    </button>
-                </div>
+    <!-- Categorías Activas -->
+    <div class="card">
+        <div class="card-header">
+            <h5>📂 Categorías Activas</h5>
+            <button class="btn btn-success btn-sm" onclick="nuevaCategoria()">➕ Nueva Categoría</button>
+        </div>
+        <div class="card-body">
+            {% if categorias|length > 0 %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for categoria in categorias %}
+                    <tr>
+                        <td>{{ categoria.id }}</td>
+                        <td><strong>{{ categoria.nombre }}</strong></td>
+                        <td>{{ categoria.descripcion|default('Sin descripción') }}</td>
+                        <td>{{ categoria.fecha_creacion|default('N/A') }}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm" onclick="verCategoria({{ categoria.id }})">👁️ Ver</button>
+                            <button class="btn btn-warning btn-sm" onclick="editarCategoria({{ categoria.id }})">✏️ Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarCategoria({{ categoria.id }})">🗑️ Eliminar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <h5>📭 No hay categorías activas</h5>
+                <p>Crea tu primera categoría usando el botón "Nueva Categoría"</p>
             </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Lista de categorías activas -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-list"></i> <span id="lista-titulo">Categorías Activas</span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if usando_fallback is defined and usando_fallback %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-database"></i>
-                            <strong>Modo de desarrollo:</strong> Mostrando datos de ejemplo.
-                            <br><small>Configura la conexión a la base de datos para ver datos reales.</small>
-                        </div>
-                    {% endif %}
-
-                    <div id="categorias-container">
-                        {% if categorias is empty %}
-                            <div class="alert alert-info text-center">
-                                <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                <h5>No hay categorías disponibles</h5>
-                                <p>Comienza creando tu primera categoría usando el botón "Nueva Categoría".</p>
-                            </div>
-                        {% else %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nombre</th>
-                                            <th>Descripción</th>
-                                            <th>Estado</th>
-                                            <th>Fecha Creación</th>
-                                            <th>Productos</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for categoria in categorias %}
-                                            <tr>
-                                                <td><strong>#{{ categoria.id }}</strong></td>
-                                                <td>
-                                                    <i class="fas fa-tag text-primary"></i> 
-                                                    {{ categoria.nombre }}
-                                                </td>
-                                                <td>
-                                                    {% if categoria.descripcion is defined %}
-                                                        {{ categoria.descripcion|slice(0, 50) }}{% if categoria.descripcion|length > 50 %}...{% endif %}
-                                                    {% else %}
-                                                        <span class="text-muted">Sin descripción</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if categoria.activo %}
-                                                        <span class="badge bg-success">
-                                                            <i class="fas fa-check"></i> Activa
-                                                        </span>
-                                                    {% else %}
-                                                        <span class="badge bg-warning">
-                                                            <i class="fas fa-pause"></i> Inactiva
-                                                        </span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if categoria.created_at is defined %}
-                                                        {{ categoria.created_at|date('d/m/Y H:i') }}
-                                                    {% else %}
-                                                        <span class="text-muted">No disponible</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-info">
-                                                        {{ categoria.total_productos ?? 0 }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <button class="btn btn-outline-primary" title="Ver detalles">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-outline-success" title="Editar">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        {% if categoria.activo %}
-                                                            <button class="btn btn-outline-warning" title="Desactivar">
-                                                                <i class="fas fa-pause"></i>
-                                                            </button>
-                                                        {% else %}
-                                                            <button class="btn btn-outline-success" title="Activar">
-                                                                <i class="fas fa-play"></i>
-                                                            </button>
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+    <!-- Categorías Inactivas (solo si hay) -->
+    {% if categorias_inactivas|length > 0 %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>🗃️ Categorías Inactivas</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for categoria in categorias_inactivas %}
+                    <tr class="text-muted">
+                        <td>{{ categoria.id }}</td>
+                        <td>{{ categoria.nombre }}</td>
+                        <td>{{ categoria.descripcion|default('Sin descripción') }}</td>
+                        <td>{{ categoria.fecha_creacion|default('N/A') }}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="reactivarCategoria({{ categoria.id }})">🔄 Reactivar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+    {% endif %}
+    {% endif %}
 
-    <!-- Área de pruebas de API -->
-    <div class="row mt-4" id="api-test-area" style="display: none;">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-code"></i> Prueba de API - Categorías
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Endpoints Disponibles:</h6>
-                            <div class="list-group">
-                                <button class="list-group-item list-group-item-action" onclick="testAPI('GET', '/api/categorias')">
-                                    <span class="badge bg-primary">GET</span> /api/categorias - Listar todas
-                                </button>
-                                <button class="list-group-item list-group-item-action" onclick="testAPI('GET', '/api/categorias/1')">
-                                    <span class="badge bg-primary">GET</span> /api/categorias/{id} - Ver una específica
-                                </button>
-                                <button class="list-group-item list-group-item-action" onclick="testAPI('POST', '/api/categorias')">
-                                    <span class="badge bg-success">POST</span> /api/categorias - Crear nueva
-                                </button>
-                                <button class="list-group-item list-group-item-action" onclick="testAPI('PUT', '/api/categorias/1')">
-                                    <span class="badge bg-warning">PUT</span> /api/categorias/{id} - Actualizar
-                                </button>
-                                <button class="list-group-item list-group-item-action" onclick="testAPI('DELETE', '/api/categorias/1')">
-                                    <span class="badge bg-danger">DELETE</span> /api/categorias/{id} - Eliminar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Respuesta de API:</h6>
-                            <pre id="api-response" class="bg-light p-3" style="height: 300px; overflow-y: auto;">
-Haz clic en algún endpoint para ver la respuesta...
-                            </pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para crear/editar categoría -->
-<div class="modal fade" id="categoriaModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modal-title">Nueva Categoría</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="categoria-form">
-                    <div class="mb-3">
-                        <label for="categoria-nombre" class="form-label">Nombre *</label>
-                        <input type="text" class="form-control" id="categoria-nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="categoria-descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="categoria-descripcion" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="categoria-activo" checked>
-                        <label class="form-check-label" for="categoria-activo">
-                            Categoría activa
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="guardarCategoria()">Guardar</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-let categoriaEditando = null;
-let mostrandoInactivas = false;
-
-function mostrarModalCrear() {
-    console.log('mostrarModalCrear() llamada');
-    try {
-        categoriaEditando = null;
-        document.getElementById('modal-title').textContent = 'Nueva Categoría';
-        document.getElementById('categoria-nombre').value = '';
-        document.getElementById('categoria-descripcion').value = '';
-        document.getElementById('categoria-activo').checked = true;
+function nuevaCategoria() {
+    const nombre = prompt('Nombre de la nueva categoría:');
+    if (nombre) {
+        const descripcion = prompt('Descripción (opcional):') || '';
         
-        const modalElement = document.getElementById('categoriaModal');
-        console.log('Modal element:', modalElement);
-        
-        if (!modalElement) {
-            console.error('No se encontró el elemento categoriaModal');
-            return;
-        }
-        
-        const modal = new bootstrap.Modal(modalElement);
-        console.log('Modal instance:', modal);
-        modal.show();
-    } catch (error) {
-        console.error('Error en mostrarModalCrear:', error);
-        alert('Error al abrir el modal: ' + error.message);
+        fetch('/api/categorias', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({nombre: nombre, descripcion: descripcion})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Categoría creada exitosamente');
+                location.reload();
+            } else {
+                alert('❌ Error: ' + data.message);
+            }
+        })
+        .catch(error => alert('❌ Error de conexión: ' + error));
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM cargado, inicializando...');
-    console.log('mostrarModalCrear definida?', typeof mostrarModalCrear);
-    console.log('bootstrap disponible?', typeof bootstrap);
-    cargarCategorias();
-});
-
-async function cargarCategorias() {
-    const container = document.getElementById('categorias-container');
-    
-
-    container.innerHTML = `
-        <div class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando...</span>
-            </div>
-            <p class="mt-2 text-muted">Cargando categorías...</p>
-        </div>
-    `;
-    
-    try {
-        const endpoint = mostrandoInactivas ? '/api/categorias?activo=false' : '/api/categorias?activo=true';
-        console.log('Cargando desde:', endpoint);
+function editarCategoria(id) {
+    const nombre = prompt('Nuevo nombre:');
+    if (nombre) {
+        const descripcion = prompt('Nueva descripción (opcional):') || '';
         
-        const response = await fetch(endpoint);
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        console.log('Datos recibidos:', result);
-        
-        if (!result || typeof result !== 'object') {
-            throw new Error('Respuesta inválida del servidor');
-        }
-        
-        const categorias = result.data || result.categorias || result || [];
-        
-        if (Array.isArray(categorias) && categorias.length > 0) {
-            let html = '<div class="table-responsive"><table class="table table-hover">';
-            html += '<thead class="table-dark"><tr>';
-            html += '<th>ID</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th>Productos</th><th>Fecha</th><th>Acciones</th>';
-            html += '</tr></thead><tbody>';
-            
-            categorias.forEach(categoria => {
-    
-                let fechaCreacion = 'No disponible';
-                if (categoria.createdAt || categoria.created_at) {
-                    const fecha = categoria.createdAt || categoria.created_at;
-                    try {
-                        const fechaObj = new Date(fecha);
-                        fechaCreacion = fechaObj.toLocaleDateString('es-ES');
-                    } catch (e) {
-                        fechaCreacion = fecha.toString();
-                    }
-                }
-                
-                html += `<tr>
-                    <td><span class="badge bg-secondary">#${categoria.id || 'N/A'}</span></td>
-                    <td><strong>${categoria.nombre || 'Sin nombre'}</strong></td>
-                    <td>${categoria.descripcion || '<em class="text-muted">Sin descripción</em>'}</td>
-                    <td>
-                        ${(categoria.activo === true || categoria.activo === 1)
-                            ? '<span class="badge bg-success"><i class="fas fa-check"></i> Activa</span>' 
-                            : '<span class="badge bg-warning"><i class="fas fa-pause"></i> Inactiva</span>'
-                        }
-                    </td>
-                    <td><span class="badge bg-info">${categoria.totalProductos || categoria.total_productos || 0}</span></td>
-                    <td><small class="text-muted">${fechaCreacion}</small></td>
-                    <td>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-primary btn-sm" onclick="editarCategoria(${categoria.id})" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            ${(categoria.activo === true || categoria.activo === 1)
-                                ? `<button class="btn btn-outline-danger btn-sm" onclick="eliminarCategoria(${categoria.id})" title="Eliminar">
-                                    <i class="fas fa-trash"></i>
-                                   </button>`
-                                : `<button class="btn btn-outline-success btn-sm" onclick="restaurarCategoria(${categoria.id})" title="Restaurar">
-                                    <i class="fas fa-undo"></i>
-                                   </button>`
-                            }
-                        </div>
-                    </td>
-                </tr>`;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-            
-            
-            actualizarEstadisticas();
-            
-        } else {
-            
-            container.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="fas fa-tags fa-4x text-muted mb-4"></i>
-                    <h4 class="text-muted">No hay categorías ${mostrandoInactivas ? 'inactivas' : 'activas'}</h4>
-                    <p class="text-muted">
-                        ${mostrandoInactivas 
-                            ? 'No tienes categorías inactivas.' 
-                            : 'Comienza creando tu primera categoría.'
-                        }
-                    </p>
-                    ${!mostrandoInactivas ? '<button class="btn btn-success" onclick="mostrarModalCrear()"><i class="fas fa-plus"></i> Crear Primera Categoría</button>' : ''}
-                </div>
-            `;
-        }
-        
-    } catch (error) {
-        console.error('Error al cargar categorías:', error);
-        container.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle"></i>
-                <strong>Error al cargar categorías:</strong> ${error.message}
-                <br><small>Revisa la consola del navegador para más detalles.</small>
-                <br><button class="btn btn-sm btn-outline-danger mt-2" onclick="cargarCategorias()">
-                    <i class="fas fa-retry"></i> Intentar de nuevo
-                </button>
-            </div>
-        `;
-    }
-}
-
-async function editarCategoria(id) {
-    try {
-        const response = await fetch(`/api/categorias/${id}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            categoriaEditando = id;
-            document.getElementById('modal-title').textContent = 'Editar Categoría';
-            document.getElementById('categoria-nombre').value = result.data.nombre;
-            document.getElementById('categoria-descripcion').value = result.data.descripcion || '';
-            document.getElementById('categoria-activo').checked = result.data.activo;
-            
-            const modal = new bootstrap.Modal(document.getElementById('categoriaModal'));
-            modal.show();
-        } else {
-            alert('Error al cargar categoría: ' + result.message);
-        }
-    } catch (error) {
-        alert('Error de conexión: ' + error.message);
-    }
-}
-
-async function guardarCategoria() {
-    const nombre = document.getElementById('categoria-nombre').value.trim();
-    const descripcion = document.getElementById('categoria-descripcion').value.trim();
-    const activo = document.getElementById('categoria-activo').checked;
-    
-    if (!nombre) {
-        alert('El nombre es requerido');
-        return;
-    }
-    
-    const data = {
-        nombre: nombre,
-        descripcion: descripcion || null,
-        activo: activo
-    };
-    
-    try {
-        const isEdit = categoriaEditando !== null;
-        const url = isEdit ? `/api/categorias/${categoriaEditando}` : '/api/categorias';
-        const method = isEdit ? 'PUT' : 'POST';
-        
-        console.log('Enviando request a:', url);
-        console.log('Método:', method);
-        console.log('Datos:', data);
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
+        fetch(`/api/categorias/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({nombre: nombre, descripcion: descripcion})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Categoría actualizada exitosamente');
+                location.reload();
+            } else {
+                alert('❌ Error: ' + data.message);
+            }
         });
-        
-        console.log('Status de respuesta:', response.status);
-        console.log('Headers de respuesta:', response.headers);
-        
-        let result;
-        const responseText = await response.text();
-        console.log('Respuesta raw:', responseText);
-        
-        try {
-            result = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('Error parsing JSON:', parseError);
-            console.error('Respuesta no es JSON válido:', responseText);
-            alert('Error: La respuesta del servidor no es JSON válido');
-            return;
-        }
-        
-        console.log('Resultado parseado:', result);
-        
-        
-        if (response.ok && (result.success || result.categoria || result.id || result.demo_mode)) {
-            const mensaje = result.message || 
-                          (result.demo_mode ? 'Categoría creada en modo demo' : 'Categoría guardada exitosamente');
-            
-            
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-success alert-dismissible fade show';
-            alertDiv.innerHTML = `
-                <i class="fas fa-check-circle"></i> ${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
-            
-        
-            bootstrap.Modal.getInstance(document.getElementById('categoriaModal')).hide();
-            
-            document.getElementById('categoria-nombre').value = '';
-            document.getElementById('categoria-descripcion').value = '';
-            document.getElementById('categoria-activo').checked = true;
-            categoriaEditando = null;
-            
-           
-            setTimeout(() => {
-                cargarCategorias();
-                
-                setTimeout(() => {
-                    if (alertDiv && alertDiv.parentNode) {
-                        alertDiv.remove();
-                    }
-                }, 5000);
-            }, 500);
-        } else if (result.error) {
-            alert('Error del servidor: ' + result.error);
+    }
+}
+
+function eliminarCategoria(id) {
+    if (confirm('¿Estás seguro de que deseas desactivar esta categoría?')) {
+        fetch(`/api/categorias/${id}`, {method: 'DELETE'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Categoría desactivada exitosamente');
+                location.reload();
+            } else {
+                alert('❌ Error: ' + data.message);
+            }
+        });
+    }
+}
+
+function reactivarCategoria(id) {
+    fetch(`/api/categorias/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({activo: true})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Categoría reactivada exitosamente');
+            location.reload();
         } else {
-            console.error('Respuesta inesperada:', result);
-            alert('Error desconocido. Ver consola para detalles.');
-        }
-    } catch (error) {
-        console.error('Error completo:', error);
-        alert('Error de conexión: ' + error.message);
-    }
-}
-
-async function eliminarCategoria(id) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta categoría?\n\nLa categoría se marcará como inactiva para mantener la integridad de los datos.')) {
-        try {
-            const response = await fetch(`/api/categorias/${id}`, {
-                method: 'DELETE'
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                alert(result.message);
-                cargarCategorias();
-            } else {
-                alert('Error: ' + result.message);
-            }
-        } catch (error) {
-            alert('Error de conexión: ' + error.message);
-        }
-    }
-}
-
-async function restaurarCategoria(id) {
-    if (confirm('¿Quieres restaurar esta categoría?')) {
-        try {
-            const response = await fetch(`/api/categorias/${id}/restore`, {
-                method: 'PUT'
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                alert(result.message);
-                cargarCategorias();
-            } else {
-                alert('Error: ' + result.message);
-            }
-        } catch (error) {
-            alert('Error de conexión: ' + error.message);
-        }
-    }
-}
-
-function toggleInactivas() {
-    mostrandoInactivas = !mostrandoInactivas;
-    document.getElementById('toggle-text').textContent = mostrandoInactivas ? 'Ver Activas' : 'Ver Inactivas';
-    document.getElementById('lista-titulo').textContent = mostrandoInactivas ? 'Categorías Inactivas' : 'Categorías Activas';
-    cargarCategorias();
-}
-
-function probarAPI() {
-    const area = document.getElementById('api-test-area');
-    area.style.display = area.style.display === 'none' ? 'block' : 'none';
-}
-
-async function testAPI(method, endpoint) {
-    try {
-        let options = { method: method };
-        
-        if (method === 'POST') {
-            options.headers = { 'Content-Type': 'application/json' };
-            options.body = JSON.stringify({
-                nombre: 'Categoría de Prueba API',
-                descripcion: 'Creada desde la prueba de API',
-                activo: true
-            });
-        } else if (method === 'PUT') {
-            options.headers = { 'Content-Type': 'application/json' };
-            options.body = JSON.stringify({
-                nombre: 'Categoría Actualizada API',
-                descripcion: 'Actualizada desde la prueba de API'
-            });
-        }
-        
-        const response = await fetch(endpoint, options);
-        const result = await response.json();
-        
-        document.getElementById('api-response').textContent = JSON.stringify(result, null, 2);
-        
-        if (result.success && ['POST', 'PUT', 'DELETE'].includes(method)) {
-            setTimeout(() => cargarCategorias(), 1000);
-        }
-    } catch (error) {
-        document.getElementById('api-response').textContent = `Error: ${error.message}`;
-    }
-}
-
-async function actualizarEstadisticas() {
-    try {
-        const [activasResponse, inactivasResponse] = await Promise.all([
-            fetch('/api/categorias?activo=true'),
-            fetch('/api/categorias?activo=false')
-        ]);
-        
-        if (activasResponse.ok && inactivasResponse.ok) {
-            const activasData = await activasResponse.json();
-            const inactivasData = await inactivasResponse.json();
-            
-            const totalActivas = (activasData.data || activasData || []).length;
-            const totalInactivas = (inactivasData.data || inactivasData || []).length;
-            
-        
-            const activasElement = document.querySelector('.stats-card.success h4');
-            const inactivasElement = document.querySelector('.stats-card.warning h4');
-            
-            if (activasElement) activasElement.textContent = totalActivas;
-            if (inactivasElement) inactivasElement.textContent = totalInactivas;
-        }
-    } catch (error) {
-        console.warn('Error actualizando estadísticas:', error);
-        
-    }
-}
-
-function verDetalles(id) {
-
-    alert(`Ver detalles de la categoría #${id}\n\nEsta funcionalidad se implementará próximamente.`);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Página de categorías cargada');
-    
-
-    cargarCategorias();
-
-    setInterval(actualizarEstadisticas, 30000);
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('categoriaModal'));
-            if (modal) modal.hide();
+            alert('❌ Error: ' + data.message);
         }
     });
-});
+}
+
+function verCategoria(id) {
+    fetch(`/api/categorias/${id}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const cat = data.data;
+            alert(`📋 Información de Categoría\n\nID: ${cat.id}\nNombre: ${cat.nombre}\nDescripción: ${cat.descripcion}\nActivo: ${cat.activo ? 'Sí' : 'No'}\nCreado: ${cat.fecha_creacion}\nActualizado: ${cat.fecha_actualizacion}`);
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    });
+}
 </script>
 {% endblock %}

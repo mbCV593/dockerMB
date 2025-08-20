@@ -25,8 +25,11 @@ class Categoria
     #[ORM\Column]
     private bool $activo = true;
 
-    #[ORM\Column]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(name: 'created_at', type: 'datetime')]
+    private ?\DateTime $fechaCreacion = null;
+
+    #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
+    private ?\DateTime $fechaActualizacion = null;
 
     #[ORM\OneToMany(targetEntity: Producto::class, mappedBy: 'categoria')]
     private Collection $productos;
@@ -34,7 +37,8 @@ class Categoria
     public function __construct()
     {
         $this->productos = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
+        $this->fechaCreacion = new \DateTime();
+        // fechaActualizacion se asigna solo cuando se modifica
     }
 
     public function getId(): ?int
@@ -75,14 +79,25 @@ class Categoria
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getFechaCreacion(): ?\DateTime
     {
-        return $this->createdAt;
+        return $this->fechaCreacion;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setFechaCreacion(\DateTime $fechaCreacion): static
     {
-        $this->createdAt = $createdAt;
+        $this->fechaCreacion = $fechaCreacion;
+        return $this;
+    }
+
+    public function getFechaActualizacion(): ?\DateTime
+    {
+        return $this->fechaActualizacion;
+    }
+
+    public function setFechaActualizacion(\DateTime $fechaActualizacion): static
+    {
+        $this->fechaActualizacion = $fechaActualizacion;
         return $this;
     }
 
@@ -113,6 +128,15 @@ class Categoria
         }
 
         return $this;
+    }
+
+    /**
+     * Actualiza automáticamente la fecha de modificación
+     */
+    #[ORM\PreUpdate]
+    public function updateTimestamp(): void
+    {
+        $this->fechaActualizacion = new \DateTime();
     }
 
     public function __toString(): string
