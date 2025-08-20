@@ -1,0 +1,226 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - Sistema de Inventario{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-3">
+                <i class="fas fa-chart-bar"></i> Dashboard del Sistema
+            </h1>
+        </div>
+    </div>
+
+    <!-- Estadísticas Principales -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card shadow">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                Total Productos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">
+                                {{ estadisticas.total_productos }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card warning shadow">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                Stock Bajo
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">
+                                {{ estadisticas.productos_bajo_stock }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card danger shadow">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                Sin Stock
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">
+                                {{ estadisticas.productos_sin_stock }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card success shadow">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                Valor Total
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">
+                                Q{{ estadisticas.valor_inventario|number_format(2) }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos y Tablas -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-area"></i> Resumen del Inventario
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <!-- Aquí iría un gráfico, por ahora mostraremos info básica -->
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="border-right pb-3 mb-3">
+                                    <h5 class="text-success">{{ estadisticas.total_productos - estadisticas.productos_sin_stock }}</h5>
+                                    <p class="text-muted mb-0">Productos en Stock</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border-right pb-3 mb-3">
+                                    <h5 class="text-warning">{{ estadisticas.productos_bajo_stock }}</h5>
+                                    <p class="text-muted mb-0">Necesitan Reabastecimiento</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="pb-3 mb-3">
+                                    <h5 class="text-danger">{{ estadisticas.productos_sin_stock }}</h5>
+                                    <p class="text-muted mb-0">Agotados</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-tasks"></i> Acciones Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('productos_web') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> Ver Productos
+                        </a>
+                        <a href="/api/productos" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-code"></i> API Productos
+                        </a>
+                        <a href="/api/usuarios" target="_blank" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-users"></i> API Usuarios
+                        </a>
+                        <button class="btn btn-outline-success btn-sm" onclick="location.reload()">
+                            <i class="fas fa-sync"></i> Actualizar Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alertas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-bell"></i> Alertas del Sistema
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if estadisticas.productos_bajo_stock > 0 %}
+                        <div class="alert alert-warning alert-sm mb-2" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>{{ estadisticas.productos_bajo_stock }}</strong> productos necesitan reabastecimiento
+                        </div>
+                    {% endif %}
+                    
+                    {% if estadisticas.productos_sin_stock > 0 %}
+                        <div class="alert alert-danger alert-sm mb-2" role="alert">
+                            <i class="fas fa-times-circle"></i>
+                            <strong>{{ estadisticas.productos_sin_stock }}</strong> productos están agotados
+                        </div>
+                    {% endif %}
+                    
+                    {% if estadisticas.productos_bajo_stock == 0 and estadisticas.productos_sin_stock == 0 %}
+                        <div class="alert alert-success alert-sm mb-0" role="alert">
+                            <i class="fas fa-check-circle"></i>
+                            ¡Todo está en orden! No hay alertas críticas.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Productos Críticos -->
+    {% if estadisticas.productos_bajo_stock > 0 or estadisticas.productos_sin_stock > 0 %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-exclamation-triangle"></i> Productos que Requieren Atención
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        Para ver la lista completa de productos con stock bajo, utiliza la API: 
+                        <a href="/api/productos" target="_blank" class="alert-link">Ver API de Productos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .opacity-75 {
+        opacity: 0.75;
+    }
+    .alert-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,289 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Productos - Sistema de Inventario{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-3">
+                <i class="fas fa-boxes"></i> Gestión de Productos
+            </h1>
+        </div>
+    </div>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-search"></i> Filtros y Búsqueda
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchProduct" placeholder="Buscar producto...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="filterCategory">
+                                <option value="">Todas las categorías</option>
+                                <!-- Se llenará dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="filterStock">
+                                <option value="">Todos los stocks</option>
+                                <option value="bajo">Stock bajo</option>
+                                <option value="sin">Sin stock</option>
+                                <option value="normal">Stock normal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" onclick="filtrarProductos()">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Productos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list"></i> Lista de Productos
+                    </h5>
+                    <div>
+                        <button class="btn btn-success btn-sm me-2">
+                            <i class="fas fa-plus"></i> Nuevo Producto
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+                            <i class="fas fa-sync"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if productos|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Producto</th>
+                                        <th>Precio</th>
+                                        <th>Stock</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productosTableBody">
+                                    {% for producto in productos %}
+                                        <tr class="producto-row" 
+                                            data-nombre="{{ producto.nombre|lower }}"
+                                            data-stock="{{ producto.stock }}"
+                                            data-categoria="{{ producto.categoria ? producto.categoria.id : '' }}">
+                                            <td>
+                                                <span class="badge bg-secondary">#{{ producto.id }}</span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ producto.nombre }}</strong>
+                                                    {% if producto.descripcion %}
+                                                        <br><small class="text-muted">{{ producto.descripcion|slice(0, 60) }}{% if producto.descripcion|length > 60 %}...{% endif %}</small>
+                                                    {% endif %}
+                                                    {% if producto.categoria %}
+                                                        <br><span class="badge bg-info">{{ producto.categoria.nombre }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-success">Q{{ producto.precio|number_format(2) }}</span>
+                                            </td>
+                                            <td>
+                                                {% set stockMinimo = producto.stockMinimo|default(5) %}
+                                                {% if producto.stock <= 0 %}
+                                                    <span class="badge bg-danger">Sin Stock</span>
+                                                {% elseif producto.stock <= stockMinimo %}
+                                                    <span class="badge bg-warning">{{ producto.stock }} (Bajo)</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">{{ producto.stock }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if producto.activo %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Activo
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-times"></i> Inactivo
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-outline-primary btn-sm" 
+                                                            onclick="verProducto({{ producto.id }})" 
+                                                            title="Ver detalles">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary btn-sm" 
+                                                            onclick="editarProducto({{ producto.id }})" 
+                                                            title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-info btn-sm" 
+                                                            onclick="movimientosProducto({{ producto.id }})" 
+                                                            title="Ver movimientos">
+                                                        <i class="fas fa-history"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginación (opcional) -->
+                        <nav aria-label="Navegación de productos" class="mt-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="text-muted">
+                                        Mostrando {{ productos|length }} productos
+                                    </p>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <!-- Aquí iría la paginación si fuera necesaria -->
+                                </div>
+                            </div>
+                        </nav>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted">No hay productos registrados</h4>
+                            <p class="text-muted">Comienza agregando tu primer producto al inventario</p>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Agregar Primer Producto
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen rápido -->
+    {% if productos|length > 0 %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h5 class="text-primary">{{ productos|length }}</h5>
+                            <p class="text-muted mb-0">Total Productos</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-success">
+                                {% set valorTotal = 0 %}
+                                {% for producto in productos %}
+                                    {% set valorTotal = valorTotal + (producto.precio * producto.stock) %}
+                                {% endfor %}
+                                Q{{ valorTotal|number_format(2) }}
+                            </h5>
+                            <p class="text-muted mb-0">Valor Total Inventario</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-info">
+                                {% set stockTotal = 0 %}
+                                {% for producto in productos %}
+                                    {% set stockTotal = stockTotal + producto.stock %}
+                                {% endfor %}
+                                {{ stockTotal }}
+                            </h5>
+                            <p class="text-muted mb-0">Unidades Totales</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-warning">
+                                {% set productosActivos = 0 %}
+                                {% for producto in productos %}
+                                    {% if producto.activo %}
+                                        {% set productosActivos = productosActivos + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ productosActivos }}
+                            </h5>
+                            <p class="text-muted mb-0">Productos Activos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function verProducto(id) {
+    window.open(`/api/productos/${id}`, '_blank');
+}
+
+function editarProducto(id) {
+    alert(`Función de editar producto ${id} - Por implementar`);
+}
+
+function movimientosProducto(id) {
+    alert(`Ver movimientos del producto ${id} - Por implementar`);
+}
+
+function filtrarProductos() {
+    const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
+    const categoryFilter = document.getElementById('filterCategory').value;
+    const stockFilter = document.getElementById('filterStock').value;
+    
+    const rows = document.querySelectorAll('.producto-row');
+    
+    rows.forEach(row => {
+        let showRow = true;
+        
+        if (searchTerm && !row.dataset.nombre.includes(searchTerm)) {
+            showRow = false;
+        }
+        
+        if (categoryFilter && row.dataset.categoria !== categoryFilter) {
+            showRow = false;
+        }
+
+        if (stockFilter) {
+            const stock = parseInt(row.dataset.stock);
+            const stockMinimo = 5; 
+            
+            switch(stockFilter) {
+                case 'sin':
+                    if (stock > 0) showRow = false;
+                    break;
+                case 'bajo':
+                    if (stock <= 0 || stock > stockMinimo) showRow = false;
+                    break;
+                case 'normal':
+                    if (stock <= stockMinimo) showRow = false;
+                    break;
+            }
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    });
+}
+
+document.getElementById('searchProduct').addEventListener('input', filtrarProductos);
+document.getElementById('filterCategory').addEventListener('change', filtrarProductos);
+document.getElementById('filterStock').addEventListener('change', filtrarProductos);
+</script>
+{% endblock %}
