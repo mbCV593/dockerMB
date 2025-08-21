@@ -8,4 +8,12 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
+
+    public function boot(): void
+    {
+        parent::boot();
+        
+        // Configurar zona horaria por defecto para Guatemala
+        date_default_timezone_set('America/Guatemala');
+    }
 }

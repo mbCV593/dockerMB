@@ -37,7 +37,9 @@ class Categoria
     public function __construct()
     {
         $this->productos = new ArrayCollection();
-        $this->fechaCreacion = new \DateTime();
+        // Establecer fecha de creación con zona horaria de Guatemala
+        $guatemala = new \DateTimeZone('America/Guatemala');
+        $this->fechaCreacion = new \DateTime('now', $guatemala);
         // fechaActualizacion se asigna solo cuando se modifica
     }
 

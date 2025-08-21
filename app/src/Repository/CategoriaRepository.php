@@ -23,6 +23,14 @@ class CategoriaRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findAllOrderedById(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     
     public function findByNombreLike(string $nombre): array
     {

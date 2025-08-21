@@ -3,9 +3,30 @@
 {% block title %}Categorias - Sistema de Inventario{% endblock %}
 
 {% block body %}
-    <h1>Gestion de Categorias</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>📁 Gestión de Categorías</h1>
+        <a 
+            href="{{ path('categorias_nueva') }}" 
+            style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;"
+        >
+            ➕ Nueva Categoría
+        </a>
+    </div>
+
+    {# Mostrar mensajes flash #}
+    {% for message in app.flashes('success') %}
+        <div style="background: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 15px;">
+            ✓ {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div style="background: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 15px;">
+            ✗ {{ message }}
+        </div>
+    {% endfor %}
     
-    <p>Total de categorias: {{ total }}</p>
+    <p><strong>Total de categorías:</strong> {{ total }}</p>
     
     <table style="width: 100%; border: 1px solid #ccc; border-collapse: collapse; margin-top: 20px;">
         <thead>
@@ -13,16 +34,22 @@
                 <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">ID</th>
                 <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Nombre</th>
                 <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Descripcion</th>
+                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Estado</th>
                 <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Fecha</th>
             </tr>
         </thead>
         <tbody>
             {% for categoria in categorias %}
             <tr>
-                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.id }}</td>
-                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.nombre }}</td>
-                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.descripcion }}</td>
-                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.fecha }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.getId }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;"><strong>{{ categoria.getNombre }}</strong></td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.getDescripcion ?? '-' }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">
+                    <span style="color: {{ categoria.isActivo ? '#28a745' : '#dc3545' }};">
+                        {{ categoria.isActivo ? '✓ Activa' : '✗ Inactiva' }}
+                    </span>
+                </td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.getFechaCreacion|date('d/m/Y H:i', 'America/Guatemala') }}</td>
             </tr>
             {% endfor %}
         </tbody>

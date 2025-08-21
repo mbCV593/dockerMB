@@ -57,7 +57,7 @@ DATABASE_URL="mysql://PruebasMB:MbPru3bas2025%40@132.226.40.48:3310/PruebasMB?se
 > Si el `serverVersion` exacto de tu MySQL remoto es 8.4, puedes usar `serverVersion=8.4`; si no estás seguro, 8.0 funciona en general con Doctrine.
 
 ## 4) Probar Symfony en el navegador
-Abre http://localhost:8080
+Abre http://localhost:8090
 
 ## 5) Probar la conexión a la base (opcional)
 ```bash
