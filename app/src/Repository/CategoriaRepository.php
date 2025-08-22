@@ -31,6 +31,17 @@ class CategoriaRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findAllOrderedByIdDirect(): array
+    {
+        $entityManager = $this->getEntityManager();
+        $query = $entityManager->createQuery('
+            SELECT c FROM App\Entity\Categoria c
+            ORDER BY c.id ASC
+        ');
+        
+        return $query->getResult();
+    }
+
     
     public function findByNombreLike(string $nombre): array
     {

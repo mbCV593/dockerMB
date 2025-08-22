@@ -15,8 +15,8 @@ class CategoriaController extends AbstractController
     #[Route('/categorias', name: 'categorias_index')]
     public function index(CategoriaRepository $categoriaRepository): Response
     {
-        // Obtener todas las categorías activas de la base de datos
-        $categorias = $categoriaRepository->findBy(['activo' => true], ['fechaCreacion' => 'DESC']);
+
+        $categorias = $categoriaRepository->findAllOrderedByIdDirect();
         
         return $this->render('categorias/index.html.twig', [
             'categorias' => $categorias,
@@ -35,8 +35,7 @@ class CategoriaController extends AbstractController
     {
         $nombre = trim($request->request->get('nombre'));
         $descripcion = trim($request->request->get('descripcion'));
-        
-        // Validaciones básicas
+    
         if (empty($nombre)) {
             $this->addFlash('error', 'El nombre de la categoría es obligatorio.');
             return $this->redirectToRoute('categorias_nueva');
@@ -47,18 +46,16 @@ class CategoriaController extends AbstractController
             return $this->redirectToRoute('categorias_nueva');
         }
         
-        // Crear nueva categoría
+ 
         $categoria = new Categoria();
         $categoria->setNombre($nombre);
         $categoria->setDescripcion($descripcion ?: null);
         $categoria->setActivo(true);
-        $categoria->setFechaCreacion(new \DateTime());
         
         try {
             $entityManager->persist($categoria);
             $entityManager->flush();
             
-            // Limpiar el cache de entidades para forzar recarga
             $entityManager->clear();
             
             $this->addFlash('success', sprintf('Categoría "%s" creada exitosamente.', $nombre));
