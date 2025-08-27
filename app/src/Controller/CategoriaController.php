@@ -66,4 +66,66 @@ class CategoriaController extends AbstractController
             return $this->redirectToRoute('categorias_nueva');
         }
     }
+
+    #[Route('/categorias/{id}/editar', name: 'categorias_editar', requirements: ['id' => '\d+'])]
+    public function editar(int $id, CategoriaRepository $categoriaRepository): Response
+    {
+        $categoria = $categoriaRepository->find($id);
+        
+        if (!$categoria) {
+            $this->addFlash('error', 'La categoría no existe.');
+            return $this->redirectToRoute('categorias_index');
+        }
+        
+        return $this->render('categorias/editar.html.twig', [
+            'categoria' => $categoria
+        ]);
+    }
+
+    #[Route('/categorias/{id}/actualizar', name: 'categorias_actualizar', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function actualizar(int $id, Request $request, EntityManagerInterface $entityManager, CategoriaRepository $categoriaRepository): Response
+    {
+        $categoria = $categoriaRepository->find($id);
+        
+        if (!$categoria) {
+            $this->addFlash('error', 'La categoría no existe.');
+            return $this->redirectToRoute('categorias_index');
+        }
+        
+        $nombre = trim($request->request->get('nombre'));
+        $descripcion = trim($request->request->get('descripcion'));
+        $activo = (bool) $request->request->get('activo');
+        
+        // Validaciones básicas
+        if (empty($nombre)) {
+            $this->addFlash('error', 'El nombre de la categoría es obligatorio.');
+            return $this->redirectToRoute('categorias_editar', ['id' => $id]);
+        }
+        
+        if (strlen($nombre) > 100) {
+            $this->addFlash('error', 'El nombre no puede tener más de 100 caracteres.');
+            return $this->redirectToRoute('categorias_editar', ['id' => $id]);
+        }
+        
+        try {
+            // Actualizar los datos de la categoría
+            $categoria->setNombre($nombre);
+            $categoria->setDescripcion($descripcion ?: null);
+            $categoria->setActivo($activo);
+            
+            // Establecer fecha de actualización con zona horaria de Guatemala
+            $guatemala = new \DateTimeZone('America/Guatemala');
+            $categoria->setFechaActualizacion(new \DateTime('now', $guatemala));
+            
+            $entityManager->flush();
+            $entityManager->clear();
+            
+            $this->addFlash('success', sprintf('Categoría "%s" actualizada exitosamente.', $nombre));
+            return $this->redirectToRoute('categorias_index');
+            
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Error al actualizar la categoría: ' . $e->getMessage());
+            return $this->redirectToRoute('categorias_editar', ['id' => $id]);
+        }
+    }
 }
