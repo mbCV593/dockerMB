@@ -96,7 +96,6 @@ class CategoriaController extends AbstractController
         $descripcion = trim($request->request->get('descripcion'));
         $activo = (bool) $request->request->get('activo');
         
-        // Validaciones básicas
         if (empty($nombre)) {
             $this->addFlash('error', 'El nombre de la categoría es obligatorio.');
             return $this->redirectToRoute('categorias_editar', ['id' => $id]);
@@ -108,12 +107,10 @@ class CategoriaController extends AbstractController
         }
         
         try {
-            // Actualizar los datos de la categoría
             $categoria->setNombre($nombre);
             $categoria->setDescripcion($descripcion ?: null);
             $categoria->setActivo($activo);
             
-            // Establecer fecha de actualización con zona horaria de Guatemala
             $guatemala = new \DateTimeZone('America/Guatemala');
             $categoria->setFechaActualizacion(new \DateTime('now', $guatemala));
             
@@ -127,5 +124,31 @@ class CategoriaController extends AbstractController
             $this->addFlash('error', 'Error al actualizar la categoría: ' . $e->getMessage());
             return $this->redirectToRoute('categorias_editar', ['id' => $id]);
         }
+    }
+
+    #[Route('/categorias/{id}/eliminar', name: 'categorias_eliminar', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function eliminar(int $id, EntityManagerInterface $entityManager, CategoriaRepository $categoriaRepository): Response
+    {
+        $categoria = $categoriaRepository->find($id);
+        
+        if (!$categoria) {
+            $this->addFlash('error', 'La categoría no existe.');
+            return $this->redirectToRoute('categorias_index');
+        }
+        
+        $nombreCategoria = $categoria->getNombre();
+        
+        try {
+            $entityManager->remove($categoria);
+            $entityManager->flush();
+            $entityManager->clear();
+            
+            $this->addFlash('success', sprintf('Categoría "%s" eliminada exitosamente.', $nombreCategoria));
+            
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Error al eliminar la categoría: ' . $e->getMessage());
+        }
+        
+        return $this->redirectToRoute('categorias_index');
     }
 }

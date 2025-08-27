@@ -53,9 +53,17 @@
                 <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.getFechaCreacion|date('d/m/Y H:i', 'America/Guatemala') }}</td>
                 <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
                     <a href="{{ path('categorias_editar', {'id': categoria.getId}) }}" 
-                       style="background-color: #17a2b8; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;">
+                       style="background-color: #17a2b8; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px; margin-right: 5px;">
                         ✏️ Editar
                     </a>
+                    <form method="POST" action="{{ path('categorias_eliminar', {'id': categoria.getId}) }}" 
+                          style="display: inline;" 
+                          onsubmit="return confirm('¿Estás seguro de que quieres eliminar la categoría &quot;{{ categoria.getNombre }}&quot;?');">
+                        <button type="submit" 
+                                style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 3px; font-size: 12px; cursor: pointer;">
+                            🗑️ Eliminar
+                        </button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
