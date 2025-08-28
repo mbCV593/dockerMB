@@ -26,6 +26,17 @@ class ProveedorRepository extends ServiceEntityRepository
     }
 
     /**
+     * Obtiene todos los proveedores ordenados por ID ascendente
+     */
+    public function findAllOrderedByIdDirect(): array
+    {
+        $dql = 'SELECT p FROM App\Entity\Proveedor p ORDER BY p.id ASC';
+        return $this->getEntityManager()
+            ->createQuery($dql)
+            ->getResult();
+    }
+
+    /**
      * Busca proveedores por nombre
      */
     public function findByName(string $nombre): array
