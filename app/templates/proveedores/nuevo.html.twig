@@ -1,0 +1,299 @@
+{% extends 'base-simple.html.twig' %}
+
+{% block title %}Nuevo Proveedor - Sistema de Inventario{% endblock %}
+
+{% block body %}
+    <!-- Header principal -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <div class="bg-success bg-gradient rounded-3 p-3">
+                        <i class="fas fa-plus-circle fa-2x text-white"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="h2 mb-1 text-dark fw-bold">Crear Nuevo Proveedor</h1>
+                    <nav class="breadcrumb-container">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('proveedores_index') }}">Proveedores</a></li>
+                            <li class="breadcrumb-item active">Nuevo</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Mostrar mensajes flash #}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-lg-8 col-xl-6">
+            <!-- Formulario principal -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-success text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        Información del Proveedor
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ path('proveedores_crear') }}">
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-4">
+                                    <label for="nombre" class="form-label fw-bold">
+                                        <i class="fas fa-building me-1 text-success"></i>
+                                        Nombre del Proveedor <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-store"></i>
+                                        </span>
+                                        <input 
+                                            type="text" 
+                                            id="nombre" 
+                                            name="nombre" 
+                                            required 
+                                            maxlength="200"
+                                            class="form-control form-control-lg"
+                                            style="color: #212529; background-color: #ffffff; font-weight: 500;"
+                                            placeholder="Ingrese el nombre del proveedor"
+                                        >
+                                    </div>
+                                    <div class="form-text">Máximo 200 caracteres</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información de Contacto -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-address-card me-1 text-primary"></i>
+                                    Información de Contacto
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="contacto" class="form-label fw-bold text-dark">
+                                        <i class="fas fa-user me-1 text-info"></i>
+                                        Persona de Contacto
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        <input 
+                                            type="text" 
+                                            id="contacto" 
+                                            name="contacto" 
+                                            maxlength="100"
+                                            class="form-control"
+                                            style="color: #212529; background-color: #ffffff; font-weight: 500;"
+                                            placeholder="Nombre de la persona de contacto"
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="telefono" class="form-label fw-bold text-dark">
+                                        <i class="fas fa-phone me-1 text-warning"></i>
+                                        Teléfono
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-phone-alt"></i>
+                                        </span>
+                                        <input 
+                                            type="tel" 
+                                            id="telefono" 
+                                            name="telefono" 
+                                            maxlength="20"
+                                            class="form-control"
+                                            style="color: #212529; background-color: #ffffff; font-weight: 500;"
+                                            placeholder="Ej: +502 1234-5678"
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label fw-bold text-dark">
+                                        <i class="fas fa-envelope me-1 text-primary"></i>
+                                        Correo Electrónico
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-at"></i>
+                                        </span>
+                                        <input 
+                                            type="email" 
+                                            id="email" 
+                                            name="email" 
+                                            maxlength="100"
+                                            class="form-control"
+                                            style="color: #212529; background-color: #ffffff; font-weight: 500;"
+                                            placeholder="correo@ejemplo.com"
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label for="direccion" class="form-label fw-bold text-dark">
+                                        <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                        Dirección
+                                    </label>
+                                    <textarea 
+                                        id="direccion" 
+                                        name="direccion" 
+                                        rows="3"
+                                        class="form-control"
+                                        style="color: #212529; background-color: #ffffff; font-weight: 500;"
+                                        placeholder="Dirección completa del proveedor"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-toggle-on me-1 text-success"></i>
+                                    Estado del Proveedor
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-check form-check-inline">
+                                            <input 
+                                                type="radio" 
+                                                id="activo_si" 
+                                                name="activo" 
+                                                value="1" 
+                                                checked 
+                                                class="form-check-input"
+                                            >
+                                            <label for="activo_si" class="form-check-label fw-bold text-success">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Activo
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check form-check-inline">
+                                            <input 
+                                                type="radio" 
+                                                id="activo_no" 
+                                                name="activo" 
+                                                value="0" 
+                                                class="form-check-input"
+                                            >
+                                            <label for="activo_no" class="form-check-label fw-bold text-danger">
+                                                <i class="fas fa-times-circle me-1"></i>
+                                                Inactivo
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 pt-3 border-top">
+                            <button type="submit" class="btn btn-success btn-lg flex-fill">
+                                <i class="fas fa-save me-2"></i>
+                                Crear Proveedor
+                            </button>
+                            <a href="{{ path('proveedores_index') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                * Campos obligatorios
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-xl-6">
+            <!-- Panel de ayuda -->
+            <div class="card shadow border-0 bg-light mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Consejos para Proveedores
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="badge bg-success rounded-pill me-3 mt-1">1</div>
+                        <div>
+                            <strong>Información completa</strong>
+                            <p class="small text-muted mb-0">Completa todos los campos de contacto para facilitar la comunicación.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="badge bg-primary rounded-pill me-3 mt-1">2</div>
+                        <div>
+                            <strong>Datos de contacto</strong>
+                            <p class="small text-muted mb-0">Incluye email y teléfono para una comunicación eficiente.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start">
+                        <div class="badge bg-warning rounded-pill me-3 mt-1">3</div>
+                        <div>
+                            <strong>Estado activo</strong>
+                            <p class="small text-muted mb-0">Los proveedores activos aparecerán en los formularios de productos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de estadísticas -->
+            <div class="card shadow border-0 bg-gradient-primary text-white">
+                <div class="card-header border-0">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Información Útil
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end border-light">
+                                <h4 class="mb-0"><i class="fas fa-handshake"></i></h4>
+                                <small>Gestión de Proveedores</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="mb-0"><i class="fas fa-box"></i></h4>
+                            <small>Control de Inventario</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
