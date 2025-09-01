@@ -1,72 +1,158 @@
-{% extends 'base.html.twig' %}
+{% extends 'base-simple.html.twig' %}
 
 {% block title %}Categorias - Sistema de Inventario{% endblock %}
 
 {% block body %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h1>📁 Gestión de Categorías</h1>
-        <a 
-            href="{{ path('categorias_nueva') }}" 
-            style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;"
-        >
-            ➕ Nueva Categoría
-        </a>
+    <!-- Header de sección -->
+    <div class="section-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="section-title">
+                    <i class="fas fa-tags"></i>
+                    Gestión de Categorías
+                </h1>
+                <p class="section-stats">Total de categorías: {{ total }}</p>
+            </div>
+            <a href="{{ path('categorias_nueva') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-plus me-2"></i>
+                Nueva Categoría
+            </a>
+        </div>
     </div>
 
     {# Mostrar mensajes flash #}
     {% for message in app.flashes('success') %}
-        <div style="background: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 15px;">
-            ✓ {{ message }}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     {% endfor %}
 
     {% for message in app.flashes('error') %}
-        <div style="background: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 15px;">
-            ✗ {{ message }}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     {% endfor %}
     
-    <p><strong>Total de categorías:</strong> {{ total }}</p>
-    
-    <table style="width: 100%; border: 1px solid #ccc; border-collapse: collapse; margin-top: 20px;">
-        <thead>
-            <tr style="background: #f5f5f5;">
-                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">ID</th>
-                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Nombre</th>
-                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Descripcion</th>
-                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Estado</th>
-                <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Fecha</th>
-                <th style="border: 1px solid #ccc; padding: 10px; text-align: center;">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for categoria in categorias %}
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.getId }}</td>
-                <td style="border: 1px solid #ccc; padding: 10px;"><strong>{{ categoria.getNombre }}</strong></td>
-                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.getDescripcion ?? '-' }}</td>
-                <td style="border: 1px solid #ccc; padding: 10px;">
-                    <span style="color: {{ categoria.isActivo ? '#28a745' : '#dc3545' }};">
-                        {{ categoria.isActivo ? '✓ Activa' : '✗ Inactiva' }}
-                    </span>
-                </td>
-                <td style="border: 1px solid #ccc; padding: 10px;">{{ categoria.getFechaCreacion|date('d/m/Y H:i', 'America/Guatemala') }}</td>
-                <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
-                    <a href="{{ path('categorias_editar', {'id': categoria.getId}) }}" 
-                       style="background-color: #17a2b8; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px; margin-right: 5px;">
-                        ✏️ Editar
-                    </a>
-                    <form method="POST" action="{{ path('categorias_eliminar', {'id': categoria.getId}) }}" 
-                          style="display: inline;" 
-                          onsubmit="return confirm('¿Estás seguro de que quieres eliminar la categoría &quot;{{ categoria.getNombre }}&quot;?');">
-                        <button type="submit" 
-                                style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 3px; font-size: 12px; cursor: pointer;">
-                            🗑️ Eliminar
+    <!-- Tabla profesional -->
+    <div class="table-container">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if categorias is not empty %}
+                    {% for categoria in categorias %}
+                    <tr>
+                        <td><strong>#{{ categoria.getId }}</strong></td>
+                        <td class="fw-bold">{{ categoria.getNombre }}</td>
+                        <td>{{ categoria.getDescripcion ?? '-' }}</td>
+                        <td>
+                            {% if categoria.isActivo %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Activa
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times me-1"></i>Inactiva
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ categoria.getFechaCreacion|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ path('categorias_editar', {'id': categoria.getId}) }}" 
+                                   class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal"
+                                        data-item-id="{{ categoria.getId }}"
+                                        data-item-name="{{ categoria.getNombre }}"
+                                        data-item-type="categoría">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                            No hay categorías registradas
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="text-center mb-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-trash-alt text-danger fa-2x"></i>
+                        </div>
+                    </div>
+                    <h6 class="text-center mb-3">¿Estás seguro de que deseas eliminar esta <span id="itemType">categoría</span>?</h6>
+                    <p class="text-center text-muted mb-0">
+                        <strong id="itemName"></strong>
+                        <br>
+                        <small>Esta acción no se puede deshacer.</small>
+                    </p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary btn-lg px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <form id="deleteForm" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-lg px-4">
+                            <i class="fas fa-trash me-2"></i>Eliminar
                         </button>
                     </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configurar el modal de eliminación
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteModal = document.getElementById('deleteModal');
+            const deleteForm = document.getElementById('deleteForm');
+            const itemName = document.getElementById('itemName');
+            const itemType = document.getElementById('itemType');
+
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const itemId = button.getAttribute('data-item-id');
+                const name = button.getAttribute('data-item-name');
+                const type = button.getAttribute('data-item-type');
+
+                itemName.textContent = name;
+                itemType.textContent = type;
+                deleteForm.action = '/categorias/' + itemId + '/eliminar';
+            });
+        });
+    </script>
 {% endblock %}

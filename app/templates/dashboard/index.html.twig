@@ -1,31 +1,102 @@
-{% extends 'base.html.twig' %}
+{% extends 'base-simple.html.twig' %}
 
 {% block title %}Dashboard - Sistema de Inventario{% endblock %}
 
 {% block body %}
-    <h1>🏠 Dashboard Principal</h1>
-    
-    <div style="text-align: center; margin: 40px 0;">
-        <p style="font-size: 18px; color: #666;">Bienvenido al Sistema de Inventario</p>
-    </div>
-    
-    <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px;">
-        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; text-align: center; flex: 1; max-width: 300px;">
-            <h3>📁 Categorías</h3>
-            <p>Gestiona las categorías de productos</p>
-            <a href="/categorias" class="btn">Ver Categorías</a>
-        </div>
-        
-        <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; text-align: center; flex: 1; max-width: 300px;">
-            <h3>📦 Productos</h3>
-            <p>Administra tu inventario de productos</p>
-            <a href="/productos" class="btn btn-success">Ver Productos</a>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="text-center mb-4">
+                <h1 class="display-4 fw-bold text-white mb-2">Dashboard Principal</h1>
+                <p class="lead text-white-50 mb-0">Bienvenido al Sistema de Inventario Profesional</p>
+                <div class="d-flex justify-content-center align-items-center mt-3">
+                    <i class="fas fa-calendar-alt text-white-50 me-2"></i>
+                    <span class="text-white-50">{{ "now"|date('d/m/Y - H:i') }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div style="margin-top: 40px; padding: 20px; background: #fff3cd; border-radius: 8px;">
-        <h4>📊 Estado del Sistema</h4>
-        <p>✅ Dashboard funcionando correctamente</p>
-        <p>⚠️ Próximo: Crear CRUD de Categorías</p>
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 bg-primary">
+                <div class="card-body p-4 text-white text-center">
+                    <i class="fas fa-tags fa-3x mb-3"></i>
+                    <h4 class="text-white fw-bold mb-2">Categorías</h4>
+                    <p class="text-white-50 mb-4">Administrar las categorías</p>
+                    <a href="{{ path('categorias_index') }}" class="btn btn-light btn-sm fw-semibold">
+                        Ver Categorías
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 bg-success">
+                <div class="card-body p-4 text-white text-center">
+                    <i class="fas fa-boxes fa-3x mb-3"></i>
+                    <h4 class="text-white fw-bold mb-2">Productos</h4>
+                    <p class="text-white-50 mb-4">Gestión del inventario</p>
+                    <a href="{{ path('producto_index') }}" class="btn btn-light btn-sm fw-semibold">
+                        Ver Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mx-auto">
+            <div class="card h-100 border-0 bg-warning">
+                <div class="card-body p-4 text-white text-center">
+                    <i class="fas fa-truck fa-3x mb-3"></i>
+                    <h4 class="text-white fw-bold mb-2">Proveedores</h4>
+                    <p class="text-white-50 mb-4">Gestionar proveedores</p>
+                    <a href="{{ path('proveedores_index') }}" class="btn btn-light btn-sm fw-semibold">
+                        Ver Proveedores
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 bg-info">
+                <div class="card-body text-center text-white">
+                    <h5 class="text-white fw-bold">Sistema Operativo</h5>
+                    <p class="text-white-50 small">Funcionando correctamente</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 bg-dark">
+                <div class="card-body text-center text-white">
+                    <h5 class="text-white fw-bold">Base de Datos</h5>
+                    <p class="text-white-50 small">Conectada y actualizada</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 bg-secondary">
+                <div class="card-body text-center text-white">
+                    <h5 class="text-white fw-bold">Módulos CRUD</h5>
+                    <p class="text-white-50 small">Funcionando al 100%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center">
+                <h4 class="text-white fw-bold">¡Sistema Funcionando Correctamente!</h4>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

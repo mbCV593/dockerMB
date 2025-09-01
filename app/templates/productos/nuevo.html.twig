@@ -1,0 +1,266 @@
+{% extends 'base-simple.html.twig' %}
+
+{% block title %}Nuevo Producto - Sistema de Inventario{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Crear Nuevo Producto
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Navegación -->
+                        <nav aria-label="breadcrumb" class="mb-3">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="{{ path('producto_index') }}">Productos</a></li>
+                                <li class="breadcrumb-item active">Nuevo</li>
+                            </ol>
+                        </nav>
+
+                        <!-- Alertas -->
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+
+                        <form method="POST" class="needs-validation" novalidate>
+                            <div class="row">
+                                <!-- Información básica -->
+                                <div class="col-md-12 mb-4">
+                                    <h5 class="border-bottom pb-2 mb-3">
+                                        <i class="fas fa-info-circle text-primary me-2"></i>
+                                        Información Básica
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-8 mb-3">
+                                    <label for="nombre" class="form-label">Nombre del Producto *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-box"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="nombre" 
+                                               name="nombre" 
+                                               value="{{ app.request.get('nombre') }}" 
+                                               required 
+                                               autofocus
+                                               placeholder="Ej: iPhone 14 Pro Max">
+                                        <div class="invalid-feedback">
+                                            El nombre es obligatorio
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="codigo_barras" class="form-label">Código de Barras</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-barcode"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="codigo_barras" 
+                                               name="codigo_barras" 
+                                               value="{{ app.request.get('codigo_barras') }}" 
+                                               placeholder="Ej: 123456789012">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="descripcion" class="form-label">Descripción</label>
+                                    <textarea class="form-control" 
+                                              id="descripcion" 
+                                              name="descripcion" 
+                                              rows="3"
+                                              placeholder="Descripción detallada del producto...">{{ app.request.get('descripcion') }}</textarea>
+                                </div>
+
+                                <!-- Precio y stock -->
+                                <div class="col-md-12 mb-4 mt-3">
+                                    <h5 class="border-bottom pb-2 mb-3">
+                                        <i class="fas fa-dollar-sign text-success me-2"></i>
+                                        Precio y Stock
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="precio" class="form-label">Precio *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Q</span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="precio" 
+                                               name="precio" 
+                                               value="{{ app.request.get('precio') }}" 
+                                               step="0.01" 
+                                               min="0" 
+                                               required
+                                               placeholder="0.00">
+                                        <div class="invalid-feedback">
+                                            El precio es obligatorio
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="stock" class="form-label">Stock Actual</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-cubes"></i>
+                                        </span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="stock" 
+                                               name="stock" 
+                                               value="{{ app.request.get('stock') ?: '0' }}" 
+                                               min="0" 
+                                               placeholder="0">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="stock_minimo" class="form-label">Stock Mínimo</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="stock_minimo" 
+                                               name="stock_minimo" 
+                                               value="{{ app.request.get('stock_minimo') ?: '5' }}" 
+                                               min="0" 
+                                               placeholder="5">
+                                    </div>
+                                    <div class="form-text">
+                                        <small class="text-muted">Cantidad mínima para alertas de stock bajo</small>
+                                    </div>
+                                </div>
+
+                                <!-- Categoría y proveedor -->
+                                <div class="col-md-12 mb-4 mt-3">
+                                    <h5 class="border-bottom pb-2 mb-3">
+                                        <i class="fas fa-tags text-info me-2"></i>
+                                        Categorización
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="categoria_id" class="form-label">Categoría</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-tag"></i>
+                                        </span>
+                                        <select class="form-select" id="categoria_id" name="categoria_id">
+                                            <option value="">Selecciona una categoría</option>
+                                            {% for categoria in categorias %}
+                                                <option value="{{ categoria.id }}" 
+                                                        {{ app.request.get('categoria_id') == categoria.id ? 'selected' : '' }}>
+                                                    {{ categoria.nombre }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% if categorias|length == 0 %}
+                                        <div class="form-text">
+                                            <small class="text-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                No hay categorías disponibles. 
+                                                <a href="{{ path('categoria_nueva') }}" target="_blank">Crear una nueva</a>
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="proveedor_id" class="form-label">Proveedor</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-truck"></i>
+                                        </span>
+                                        <select class="form-select" id="proveedor_id" name="proveedor_id">
+                                            <option value="">Selecciona un proveedor</option>
+                                            {% for proveedor in proveedores %}
+                                                <option value="{{ proveedor.id }}" 
+                                                        {{ app.request.get('proveedor_id') == proveedor.id ? 'selected' : '' }}>
+                                                    {{ proveedor.nombre }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% if proveedores|length == 0 %}
+                                        <div class="form-text">
+                                            <small class="text-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                No hay proveedores disponibles. 
+                                                <a href="{{ path('proveedor_nuevo') }}" target="_blank">Crear uno nuevo</a>
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-light">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ path('producto_index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>
+                                        Crear Producto
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Ayuda -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="text-muted">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Consejos para crear productos
+                        </h6>
+                        <ul class="text-muted mb-0 small">
+                            <li>El <strong>nombre</strong> y el <strong>precio</strong> son campos obligatorios</li>
+                            <li>El <strong>stock mínimo</strong> te ayudará a recibir alertas cuando el inventario esté bajo</li>
+                            <li>Asigna una <strong>categoría</strong> para una mejor organización</li>
+                            <li>El <strong>código de barras</strong> facilita la búsqueda rápida de productos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bootstrap form validation
+        (() => {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+{% endblock %}

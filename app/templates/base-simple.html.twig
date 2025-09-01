@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Sistema de Inventario{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Font Awesome Icons -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                margin: 0;
+                padding: 0;
+            }
+
+            .navbar {
+                background: rgba(255, 255, 255, 0.1) !important;
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .navbar-brand, .nav-link {
+                color: white !important;
+                font-weight: 600;
+            }
+
+            .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+            }
+
+            .card {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+                color: white;
+            }
+
+            .text-white-50 {
+                color: rgba(255, 255, 255, 0.7) !important;
+            }
+
+            .btn-light {
+                background: white;
+                border: none;
+                color: #333;
+                font-weight: 600;
+            }
+
+            /* Contenedor de tabla profesional */
+            .table-container {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                padding: 0;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                overflow: hidden;
+            }
+
+            .table {
+                background: transparent;
+                color: #333;
+                margin-bottom: 0;
+                border-radius: 0;
+            }
+
+            .table th {
+                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                color: white;
+                border: none;
+                font-weight: 600;
+                padding: 15px 12px;
+                text-align: center;
+                font-size: 0.9rem;
+                letter-spacing: 0.5px;
+            }
+
+            .table td {
+                border-color: rgba(0, 0, 0, 0.1);
+                color: #333;
+                padding: 12px;
+                text-align: center;
+                background: rgba(255, 255, 255, 0.8);
+                vertical-align: middle;
+            }
+
+            .table tbody tr:nth-child(even) td {
+                background: rgba(248, 250, 252, 0.9);
+            }
+
+            .table tbody tr:hover td {
+                background: rgba(79, 70, 229, 0.1);
+                transition: all 0.3s ease;
+            }
+
+            /* Header de sección mejorado */
+            .section-header {
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(15px);
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 25px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .section-title {
+                color: white;
+                font-weight: 700;
+                font-size: 1.8rem;
+                margin-bottom: 5px;
+                display: flex;
+                align-items: center;
+            }
+
+            .section-title i {
+                margin-right: 15px;
+                opacity: 0.9;
+            }
+
+            .section-stats {
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+
+            .form-control {
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+            }
+
+            .form-control:focus {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.5);
+                color: white;
+                box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+            }
+
+            .form-control::placeholder {
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            .form-label {
+                color: white;
+                font-weight: 600;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="{{ path('dashboard') }}">
+                    <i class="fas fa-cube me-2"></i>
+                    InventoryPro
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('categorias_index') }}">
+                                <i class="fas fa-tags me-1"></i>
+                                Categorías
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('proveedores_index') }}">
+                                <i class="fas fa-truck me-1"></i>
+                                Proveedores
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('producto_index') }}">
+                                <i class="fas fa-boxes me-1"></i>
+                                Productos
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container mt-4">
+            {% block body %}{% endblock %}
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>
