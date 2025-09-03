@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Usuario: {{ usuario.nombreCompleto }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-user-edit me-2"></i>Editar Usuario
+                </h1>
+                <a href="{{ path('app_usuario_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+            </div>
+
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user-edit me-2"></i>Editando: {{ usuario.nombreCompleto }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nombre" class="form-label">
+                                            <i class="fas fa-user me-1 text-primary"></i>Nombre <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="nombre" 
+                                               name="nombre" 
+                                               value="{{ app.request.get('nombre') ?: usuario.nombre }}"
+                                               required
+                                               placeholder="Ingresa el nombre">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="apellido" class="form-label">
+                                            <i class="fas fa-user me-1 text-primary"></i>Apellido <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="apellido" 
+                                               name="apellido" 
+                                               value="{{ app.request.get('apellido') ?: usuario.apellido }}"
+                                               required
+                                               placeholder="Ingresa el apellido">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">
+                                            <i class="fas fa-envelope me-1 text-primary"></i>Email <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="email" 
+                                               class="form-control" 
+                                               id="email" 
+                                               name="email" 
+                                               value="{{ app.request.get('email') ?: usuario.email }}"
+                                               required
+                                               placeholder="usuario@ejemplo.com">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">
+                                            <i class="fas fa-lock me-1 text-primary"></i>Nueva Contraseña
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password" 
+                                                   class="form-control" 
+                                                   id="password" 
+                                                   name="password" 
+                                                   placeholder="Dejar vacío para mantener actual">
+                                            <button class="btn btn-outline-secondary" 
+                                                    type="button" 
+                                                    onclick="togglePassword()">
+                                                <i class="fas fa-eye" id="eyeIcon"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">Solo completa si deseas cambiar la contraseña</small>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-shield-alt me-1 text-primary"></i>Roles
+                                        </label>
+                                        {% set userRoles = usuario.roles %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   name="roles[]" 
+                                                   value="ROLE_ADMIN" 
+                                                   id="roleAdmin"
+                                                   {{ 'ROLE_ADMIN' in userRoles ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="roleAdmin">
+                                                <i class="fas fa-crown text-warning"></i> Administrador
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   name="roles[]" 
+                                                   value="ROLE_MANAGER" 
+                                                   id="roleManager"
+                                                   {{ 'ROLE_MANAGER' in userRoles ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="roleManager">
+                                                <i class="fas fa-users-cog text-info"></i> Manager
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Si no seleccionas ninguno, será Usuario normal</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-toggle-on me-1 text-primary"></i>Estado
+                                        </label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   name="activo" 
+                                                   id="activo" 
+                                                   {{ usuario.activo ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="activo">
+                                                <span id="estadoTexto">{{ usuario.activo ? 'Usuario Activo' : 'Usuario Inactivo' }}</span>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Los usuarios inactivos no pueden iniciar sesión</small>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Información:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Usuario creado el: <strong>{{ usuario.createdAt|date('d/m/Y H:i') }}</strong></li>
+                                        <li>ID del usuario: <strong>#{{ usuario.id }}</strong></li>
+                                    </ul>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <a href="{{ path('app_usuario_index') }}" class="btn btn-secondary me-md-2">
+                                                <i class="fas fa-times"></i> Cancelar
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Actualizar Usuario
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const password = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (password.type === 'password') {
+        password.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        password.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
+document.getElementById('activo').addEventListener('change', function() {
+    const estadoTexto = document.getElementById('estadoTexto');
+    if (this.checked) {
+        estadoTexto.textContent = 'Usuario Activo';
+    } else {
+        estadoTexto.textContent = 'Usuario Inactivo';
+    }
+});
+</script>
+{% endblock %}

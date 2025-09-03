@@ -1,0 +1,232 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Usuario: {{ usuario.nombreCompleto }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-user me-2"></i>Detalles del Usuario
+                </h1>
+                <div>
+                    <a href="{{ path('app_usuario_editar', {'id': usuario.id}) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a href="{{ path('app_usuario_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a la Lista
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user me-2"></i>Información Personal
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 text-center mb-3">
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white mx-auto" style="width: 80px; height: 80px; font-size: 2rem;">
+                                        {{ usuario.nombre|slice(0, 1)|upper }}{{ usuario.apellido|slice(0, 1)|upper }}
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <td width="150"><strong><i class="fas fa-id-card me-2 text-primary"></i>ID:</strong></td>
+                                                <td>#{{ usuario.id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><i class="fas fa-user me-2 text-primary"></i>Nombre:</strong></td>
+                                                <td>{{ usuario.nombre }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><i class="fas fa-user me-2 text-primary"></i>Apellido:</strong></td>
+                                                <td>{{ usuario.apellido }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><i class="fas fa-user me-2 text-primary"></i>Nombre Completo:</strong></td>
+                                                <td><span class="badge bg-secondary fs-6">{{ usuario.nombreCompleto }}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><i class="fas fa-envelope me-2 text-primary"></i>Email:</strong></td>
+                                                <td>{{ usuario.email }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Estado y Roles -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cog me-2"></i>Estado y Permisos
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Estado:</strong><br>
+                                {% if usuario.activo %}
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check"></i> Usuario Activo
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="fas fa-times"></i> Usuario Inactivo
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <strong>Roles:</strong><br>
+                                {% for role in usuario.roles %}
+                                    {% if role == 'ROLE_ADMIN' %}
+                                        <span class="badge bg-warning text-dark me-1">
+                                            <i class="fas fa-crown"></i> Administrador
+                                        </span>
+                                    {% elseif role == 'ROLE_MANAGER' %}
+                                        <span class="badge bg-info me-1">
+                                            <i class="fas fa-users-cog"></i> Manager
+                                        </span>
+                                    {% elseif role == 'ROLE_USER' %}
+                                        <span class="badge bg-secondary me-1">
+                                            <i class="fas fa-user"></i> Usuario
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-dark me-1">
+                                            {{ role|replace({'ROLE_': ''}) }}
+                                        </span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Fechas -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-calendar me-2"></i>Información de Registro
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <strong><i class="fas fa-calendar-plus me-2 text-success"></i>Creado:</strong><br>
+                                <span class="text-muted">{{ usuario.createdAt|date('d/m/Y H:i:s') }}</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong><i class="fas fa-clock me-2 text-info"></i>Hace:</strong><br>
+                                <span class="text-muted">
+                                    {% set diff = date().diff(usuario.createdAt) %}
+                                    {% if diff.days > 0 %}
+                                        {{ diff.days }} día{{ diff.days > 1 ? 's' : '' }}
+                                    {% elseif diff.h > 0 %}
+                                        {{ diff.h }} hora{{ diff.h > 1 ? 's' : '' }}
+                                    {% elseif diff.i > 0 %}
+                                        {{ diff.i }} minuto{{ diff.i > 1 ? 's' : '' }}
+                                    {% else %}
+                                        Hace unos segundos
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-tools me-2"></i>Acciones Disponibles
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ path('app_usuario_editar', {'id': usuario.id}) }}" class="btn btn-primary">
+                                    <i class="fas fa-edit"></i> Editar Usuario
+                                </a>
+                                
+                                <button type="button" 
+                                        class="btn btn-warning" 
+                                        onclick="toggleEstado({{ usuario.id }}, '{{ usuario.activo ? 'desactivar' : 'activar' }}')">
+                                    {% if usuario.activo %}
+                                        <i class="fas fa-pause"></i> Desactivar Usuario
+                                    {% else %}
+                                        <i class="fas fa-play"></i> Activar Usuario
+                                    {% endif %}
+                                </button>
+                                
+                                <button type="button" 
+                                        class="btn btn-danger" 
+                                        onclick="eliminarUsuario({{ usuario.id }}, '{{ usuario.nombreCompleto|e('js') }}')">
+                                    <i class="fas fa-trash"></i> Eliminar Usuario
+                                </button>
+                                
+                                <a href="{{ path('app_usuario_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-list"></i> Ver Todos los Usuarios
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">¿Estás seguro de que deseas eliminar el usuario:</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-user me-2"></i>
+                    <strong id="nombreUsuario"></strong>
+                </div>
+                <p class="text-danger mb-0">
+                    <small><i class="fas fa-exclamation-circle me-1"></i>Esta acción no se puede deshacer.</small>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formEliminar" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Eliminar Usuario
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function eliminarUsuario(id, nombre) {
+    document.getElementById('nombreUsuario').textContent = nombre;
+    document.getElementById('formEliminar').action = `/usuarios/${id}/eliminar`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+    modal.show();
+}
+</script>
+{% endblock %}

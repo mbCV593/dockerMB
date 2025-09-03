@@ -20,7 +20,7 @@
 
     <!-- Statistics Cards -->
     <div class="row g-4 mb-5">
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="card h-100 border-0 bg-primary">
                 <div class="card-body p-4 text-white text-center">
                     <i class="fas fa-tags fa-3x mb-3"></i>
@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="card h-100 border-0 bg-success">
                 <div class="card-body p-4 text-white text-center">
                     <i class="fas fa-boxes fa-3x mb-3"></i>
@@ -46,7 +46,7 @@
             </div>
         </div>
 
-        <div class="col-lg-4 col-md-6 mx-auto">
+        <div class="col-lg-3 col-md-6">
             <div class="card h-100 border-0 bg-warning">
                 <div class="card-body p-4 text-white text-center">
                     <i class="fas fa-truck fa-3x mb-3"></i>
@@ -58,12 +58,25 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 bg-info">
+                <div class="card-body p-4 text-white text-center">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h4 class="text-white fw-bold mb-2">Usuarios</h4>
+                    <p class="text-white-50 mb-4">Gestionar usuarios</p>
+                    <a href="{{ path('app_usuario_index') }}" class="btn btn-light btn-sm fw-semibold">
+                        Ver Usuarios
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Quick Actions -->
     <div class="row g-4 mb-5">
         <div class="col-md-4">
-            <div class="card border-0 bg-info">
+            <div class="card border-0 bg-secondary">
                 <div class="card-body text-center text-white">
                     <h5 class="text-white fw-bold">Sistema Operativo</h5>
                     <p class="text-white-50 small">Funcionando correctamente</p>
